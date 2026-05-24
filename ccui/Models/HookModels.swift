@@ -10,19 +10,21 @@ enum HookLevel: String, CaseIterable, Identifiable, Sendable {
 
     var description: String {
         switch self {
-        case .worktree: "{worktree}/.claude/settings.local.json"
-        case .user: "~/.claude/settings.local.json"
+        case .worktree: "{worktree}/<agent-config>/settings.local.json"
+        case .user: "~/<agent-config>/settings.local.json"
         }
     }
 
-    func settingsPath(worktreePath: String) -> String {
+    func settingsPath(worktreePath: String, provider: any AgentProvider = ClaudeCodeProvider()) -> String {
         switch self {
         case .worktree:
             return (worktreePath as NSString)
-                .appendingPathComponent(".claude/settings.local.json")
+                .appendingPathComponent(provider.configDirectoryName)
+                .appendingPathComponent(provider.settingsFileName)
         case .user:
             return (NSHomeDirectory() as NSString)
-                .appendingPathComponent(".claude/settings.local.json")
+                .appendingPathComponent(provider.configDirectoryName)
+                .appendingPathComponent(provider.settingsFileName)
         }
     }
 }
@@ -61,12 +63,12 @@ struct HookEntry: Identifiable, Hashable, Sendable {
 
 struct HookFireLog: Identifiable, Hashable, Sendable {
     let id: UUID
-    let eventName: ClaudeHookPayload.HookEventName
+    let eventName: AgentHookPayload.HookEventName
     let toolName: String?
     let sessionId: String
     let receivedAt: Date
 
-    init(event: ClaudeEvent) {
+    init(event: AgentEvent) {
         self.id = event.id
         self.eventName = event.hookEventName
         self.toolName = event.toolName

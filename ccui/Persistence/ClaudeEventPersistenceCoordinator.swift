@@ -4,10 +4,10 @@ import OSLog
 /// 永続化操作を直列化し、index.json への競合書き込みおよび読み取りの不整合を防ぐ。
 /// `ClaudeEventStore`（書き込み主体）と `SessionAnalyticsStore`（読み取り）が同じ
 /// インスタンスを共有することで、ファイルシステム上の整合性を担保する。
-actor ClaudeEventPersistenceCoordinator {
-    private let persistence: any ClaudeEventPersistence
+actor AgentEventPersistenceCoordinator {
+    private let persistence: any AgentEventPersistence
 
-    init(persistence: any ClaudeEventPersistence = JSONFileClaudeEventPersistence()) {
+    init(persistence: any AgentEventPersistence = JSONFileAgentEventPersistence()) {
         self.persistence = persistence
     }
 
@@ -32,7 +32,7 @@ actor ClaudeEventPersistenceCoordinator {
     }
 
     /// I/O は actor のスレッドで実行するとキューが詰まるため `Task.detached` に逃がす。
-    /// `JSONFileClaudeEventPersistence` 内の `indexLock` で並行書き込みは直列化される。
+    /// `JSONFileAgentEventPersistence` 内の `indexLock` で並行書き込みは直列化される。
     func saveSession(_ session: AgentSession, worktreePath: String, repositoryPath: String?) async {
         let persistence = self.persistence
         do {

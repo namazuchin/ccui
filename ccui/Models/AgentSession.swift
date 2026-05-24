@@ -3,7 +3,7 @@ import Foundation
 nonisolated struct AgentSession: Identifiable, Codable, Sendable {
     let id: String
     let worktreePath: String
-    private(set) var events: [ClaudeEvent]
+    private(set) var events: [AgentEvent]
     private(set) var isTruncated: Bool
     private(set) var outcome: SessionOutcome?
     private(set) var failureReasons: Set<FailureReason>
@@ -16,7 +16,7 @@ nonisolated struct AgentSession: Identifiable, Codable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
         worktreePath = try container.decode(String.self, forKey: .worktreePath)
-        events = try container.decode([ClaudeEvent].self, forKey: .events)
+        events = try container.decode([AgentEvent].self, forKey: .events)
         isTruncated = try container.decodeIfPresent(Bool.self, forKey: .isTruncated) ?? false
         let rawOutcome = try container.decodeIfPresent(String.self, forKey: .outcome)
         outcome = rawOutcome.flatMap(SessionOutcome.init(rawValue:))
@@ -43,7 +43,7 @@ nonisolated struct AgentSession: Identifiable, Codable, Sendable {
         InterventionDetector.interventions(in: events).count
     }
 
-    init(id: String, worktreePath: String, events: [ClaudeEvent] = []) {
+    init(id: String, worktreePath: String, events: [AgentEvent] = []) {
         self.id = id
         self.worktreePath = worktreePath
         self.events = events
@@ -52,7 +52,7 @@ nonisolated struct AgentSession: Identifiable, Codable, Sendable {
         self.failureReasons = []
     }
 
-    mutating func append(_ event: ClaudeEvent, maxEvents: Int) {
+    mutating func append(_ event: AgentEvent, maxEvents: Int) {
         events.append(event)
         if events.count > maxEvents {
             events.removeFirst()

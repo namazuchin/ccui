@@ -8,15 +8,18 @@ enum PermissionLevel: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
 
-    func settingsPath(worktreePath: String) -> String {
+    func settingsPath(worktreePath: String, provider: any AgentProvider = ClaudeCodeProvider()) -> String {
         switch self {
         case .worktree:
             return (worktreePath as NSString)
-                .appendingPathComponent(".claude/settings.local.json")
+                .appendingPathComponent(provider.configDirectoryName)
+                .appendingPathComponent(provider.settingsFileName)
         case .user:
-            // User permissions are in settings.json (not settings.local.json)
+            // User permissions use user settings file if available, otherwise settings file
+            let fileName = provider.userSettingsFileName ?? provider.settingsFileName
             return (NSHomeDirectory() as NSString)
-                .appendingPathComponent(".claude/settings.json")
+                .appendingPathComponent(provider.configDirectoryName)
+                .appendingPathComponent(fileName)
         }
     }
 }

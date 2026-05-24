@@ -45,7 +45,7 @@ nonisolated enum AgentState: Sendable, Equatable {
         }
     }
 
-    static func from(events: [ClaudeEvent]) -> AgentState {
+    static func from(events: [AgentEvent]) -> AgentState {
         guard let last = events.last else { return .idle }
         switch last.hookEventName {
         case .preToolUse:

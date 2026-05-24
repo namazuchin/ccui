@@ -1,8 +1,8 @@
 import SwiftUI
 
-struct ClaudeMdPanelView: View {
+struct AgentInstructionsPanelView: View {
     let repositoryPath: String
-    @Bindable var store: ClaudeMdStore
+    @Bindable var store: AgentInstructionsStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {

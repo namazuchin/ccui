@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct ClaudeMdEditorView: View {
-    @Bindable var store: ClaudeMdStore
+struct AgentInstructionsEditorView: View {
+    @Bindable var store: AgentInstructionsStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -19,7 +19,7 @@ struct ClaudeMdEditorView: View {
 
     // MARK: - Header
 
-    private func editorHeader(_ level: ClaudeMdLevel) -> some View {
+    private func editorHeader(_ level: AgentInstructionsLevel) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(level.rawValue)

@@ -16,7 +16,7 @@ final class HookTestRunner {
     private var runningProcess: Process?
 
     /// Run all commands in an entry sequentially, collecting combined output.
-    func runAll(commands: [String], entryID: UUID, eventName: ClaudeHookPayload.HookEventName, worktreePath: String) async {
+    func runAll(commands: [String], entryID: UUID, eventName: AgentHookPayload.HookEventName, worktreePath: String) async {
         state = .running
         runEntryID = entryID
 
@@ -41,7 +41,7 @@ final class HookTestRunner {
         }
     }
 
-    private func execute(command: String, eventName: ClaudeHookPayload.HookEventName, worktreePath: String) async -> (output: String, exitCode: Int32) {
+    private func execute(command: String, eventName: AgentHookPayload.HookEventName, worktreePath: String) async -> (output: String, exitCode: Int32) {
         let payload = Self.samplePayload(for: eventName, worktreePath: worktreePath)
 
         let process = Process()
@@ -121,7 +121,7 @@ final class HookTestRunner {
 
     // MARK: - Sample Payload
 
-    nonisolated static func samplePayload(for eventName: ClaudeHookPayload.HookEventName, worktreePath: String) -> Data {
+    nonisolated static func samplePayload(for eventName: AgentHookPayload.HookEventName, worktreePath: String) -> Data {
         var payload: [String: Any] = [
             "hook_event_name": eventName.rawValue,
             "cwd": worktreePath,

@@ -1,13 +1,13 @@
 import SwiftUI
 
-struct ClaudeMdListView: View {
-    @Bindable var store: ClaudeMdStore
+struct AgentInstructionsListView: View {
+    @Bindable var store: AgentInstructionsStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(store.files) { file in
                 fileRow(file)
-                if file.level != ClaudeMdLevel.allCases.last {
+                if file.level != AgentInstructionsLevel.allCases.last {
                     Rectangle()
                         .fill(Color.borderSubtle)
                         .frame(height: 1)
@@ -16,7 +16,7 @@ struct ClaudeMdListView: View {
         }
     }
 
-    private func fileRow(_ file: ClaudeMdFile) -> some View {
+    private func fileRow(_ file: AgentInstructionsFile) -> some View {
         Button {
             if file.exists {
                 store.select(file.level)

@@ -16,7 +16,7 @@ struct HooksEventListView: View {
         }
     }
 
-    private func eventRow(_ event: ClaudeHookPayload.HookEventName) -> some View {
+    private func eventRow(_ event: AgentHookPayload.HookEventName) -> some View {
         let isSelected = store.selectedEventName == event
         let entries = store.entries[event] ?? []
         let userCount = entries.filter { !$0.isManagedByCCUI }.count
@@ -62,7 +62,7 @@ struct HooksEventListView: View {
         .buttonStyle(.plain)
     }
 
-    private func iconName(for event: ClaudeHookPayload.HookEventName) -> String {
+    private func iconName(for event: AgentHookPayload.HookEventName) -> String {
         switch event {
         case .preToolUse: "arrow.right.circle"
         case .postToolUse: "arrow.left.circle"

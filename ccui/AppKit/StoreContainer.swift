@@ -44,7 +44,7 @@ final class StoreContainer {
 
     func start() {
         claudeEventStore.start()
-        terminalSessionStore.startResolvingClaudePath()
+        terminalSessionStore.startResolvingAgentPath()
     }
 
     func shutdown() {

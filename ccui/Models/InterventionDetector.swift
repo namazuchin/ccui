@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated enum InterventionDetector {
-    static func isIntervention(_ event: ClaudeEvent) -> Bool {
+    static func isIntervention(_ event: AgentEvent) -> Bool {
         switch event.hookEventName {
         case .permissionRequest, .userPromptSubmit:
             return true
@@ -12,11 +12,11 @@ nonisolated enum InterventionDetector {
         }
     }
 
-    static func interventions(in events: [ClaudeEvent]) -> [ClaudeEvent] {
+    static func interventions(in events: [AgentEvent]) -> [AgentEvent] {
         events.filter(isIntervention)
     }
 
-    static func isIntervention(_ event: ClaudeEvent, interventionIds: Set<UUID>) -> Bool {
+    static func isIntervention(_ event: AgentEvent, interventionIds: Set<UUID>) -> Bool {
         interventionIds.contains(event.id)
     }
 }

@@ -14,7 +14,7 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
 
     /// Dispatches a hook event and posts a native notification when the event
     /// represents a moment requiring user attention (permission request).
-    func dispatch(event: ClaudeEvent) {
+    func dispatch(event: AgentEvent) {
         guard shouldNotify(for: event) else { return }
 
         let title = notificationTitle(for: event)
@@ -26,7 +26,7 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         }
     }
 
-    private func shouldNotify(for event: ClaudeEvent) -> Bool {
+    private func shouldNotify(for event: AgentEvent) -> Bool {
         switch event.hookEventName {
         case .permissionRequest:
             return true
@@ -43,19 +43,19 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         }
     }
 
-    private func notificationTitle(for event: ClaudeEvent) -> String {
+    private func notificationTitle(for event: AgentEvent) -> String {
         switch event.hookEventName {
         case .permissionRequest:
             if let tool = event.toolName, !tool.isEmpty {
-                return "Claude wants to use \(tool)"
+                return "Agent wants to use \(tool)"
             }
-            return "Claude needs permission"
+            return "Agent needs permission"
         default:
-            return "Claude needs your attention"
+            return "Agent needs your attention"
         }
     }
 
-    private func notificationBody(for event: ClaudeEvent) -> String {
+    private func notificationBody(for event: AgentEvent) -> String {
         let worktreeName = (event.worktreePath as NSString).lastPathComponent
         if let message = event.message, !message.isEmpty {
             return "\(worktreeName): \(message)"

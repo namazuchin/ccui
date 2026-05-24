@@ -1,13 +1,13 @@
 import SwiftUI
 
 enum ConfigurationTab: String, CaseIterable {
-    case claudeMd = "CLAUDE.md"
+    case instructions = "Instructions"
     case hooks = "Hooks"
     case permissions = "Permissions"
 
     var icon: String {
         switch self {
-        case .claudeMd: "doc.text"
+        case .instructions: "doc.text"
         case .hooks: "bolt.fill"
         case .permissions: "lock.shield"
         }
@@ -19,8 +19,8 @@ struct ConfigurationSheet: View {
     let repositoryPath: String
     @Binding var isPresented: Bool
     @Environment(ClaudeEventStore.self) private var claudeEventStore
-    @State private var selectedTab: ConfigurationTab = .claudeMd
-    @State private var claudeMdStore = ClaudeMdStore()
+    @State private var selectedTab: ConfigurationTab = .instructions
+    @State private var instructionsStore = AgentInstructionsStore()
     @State private var hooksStore = HooksStore()
     @State private var hookTestRunner = HookTestRunner()
     @State private var permissionsStore = PermissionsStore()
@@ -51,7 +51,7 @@ struct ConfigurationSheet: View {
 
     private func saveCurrentTab() {
         switch selectedTab {
-        case .claudeMd: claudeMdStore.save()
+        case .instructions: instructionsStore.save()
         case .hooks: Task { await hooksStore.save() }
         case .permissions: Task { await permissionsStore.save() }
         }
@@ -115,8 +115,8 @@ struct ConfigurationSheet: View {
     @ViewBuilder
     private var tabContent: some View {
         switch selectedTab {
-        case .claudeMd:
-            claudeMdContent
+        case .instructions:
+            instructionsContent
         case .hooks:
             hooksContent
         case .permissions:
@@ -124,21 +124,21 @@ struct ConfigurationSheet: View {
         }
     }
 
-    private var claudeMdContent: some View {
+    private var instructionsContent: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ClaudeMdListView(store: claudeMdStore)
+            AgentInstructionsListView(store: instructionsStore)
             Rectangle()
                 .fill(Color.borderSubtle)
                 .frame(height: 1)
-            ClaudeMdEditorView(store: claudeMdStore)
+            AgentInstructionsEditorView(store: instructionsStore)
                 .frame(maxHeight: .infinity)
         }
         .background(Color.surfacePrimary)
         .onAppear {
-            claudeMdStore.load(repositoryPath: repositoryPath)
+            instructionsStore.load(repositoryPath: repositoryPath)
         }
         .onChange(of: repositoryPath) { _, newPath in
-            claudeMdStore.load(repositoryPath: newPath)
+            instructionsStore.load(repositoryPath: newPath)
         }
     }
 

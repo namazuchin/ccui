@@ -63,7 +63,7 @@ final class WorktreeStore: Identifiable {
             var errors: [(String, Error)] = []
             for path in paths {
                 do {
-                    try ClaudeHooksInstaller.install(worktreePath: path)
+                    try AgentHooksInstaller.install(worktreePath: path)
                 } catch {
                     errors.append((path, error))
                 }

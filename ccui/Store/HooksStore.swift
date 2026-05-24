@@ -6,7 +6,7 @@ import OSLog
 final class HooksStore {
     // MARK: - State
 
-    private(set) var entries: [ClaudeHookPayload.HookEventName: [HookEntry]] = [:]
+    private(set) var entries: [AgentHookPayload.HookEventName: [HookEntry]] = [:]
     private(set) var fireLogs: [HookFireLog] = []
     var selectedLevel: HookLevel = .worktree {
         didSet {
@@ -14,7 +14,7 @@ final class HooksStore {
             selectedEntryID = nil
         }
     }
-    var selectedEventName: ClaudeHookPayload.HookEventName = .preToolUse {
+    var selectedEventName: AgentHookPayload.HookEventName = .preToolUse {
         didSet { selectedEntryID = nil }
     }
     var selectedEntryID: UUID?
@@ -28,9 +28,9 @@ final class HooksStore {
     /// Preserve full JSON per level so save doesn't destroy non-hooks keys
     private var rawSettings: [HookLevel: [String: Any]] = [:]
     /// Per-level in-memory entries (source of truth for edits)
-    private var levelCache: [HookLevel: [ClaudeHookPayload.HookEventName: [HookEntry]]] = [:]
+    private var levelCache: [HookLevel: [AgentHookPayload.HookEventName: [HookEntry]]] = [:]
 
-    static let allEvents: [ClaudeHookPayload.HookEventName] = [
+    static let allEvents: [AgentHookPayload.HookEventName] = [
         .preToolUse, .postToolUse, .stop, .notification,
         .subagentStop, .permissionRequest, .userPromptSubmit
     ]
@@ -212,13 +212,13 @@ final class HooksStore {
         rawSettings[level] = Self.readSettings(at: path)
     }
 
-    private func parseEntries(for level: HookLevel) -> [ClaudeHookPayload.HookEventName: [HookEntry]] {
+    private func parseEntries(for level: HookLevel) -> [AgentHookPayload.HookEventName: [HookEntry]] {
         let raw = rawSettings[level] ?? [:]
         guard let hooksDict = raw["hooks"] as? [String: Any] else {
             return Dictionary(uniqueKeysWithValues: Self.allEvents.map { ($0, [HookEntry]()) })
         }
 
-        var result: [ClaudeHookPayload.HookEventName: [HookEntry]] = [:]
+        var result: [AgentHookPayload.HookEventName: [HookEntry]] = [:]
         for event in Self.allEvents {
             guard let rawEntries = hooksDict[event.rawValue] as? [[String: Any]] else {
                 result[event] = []

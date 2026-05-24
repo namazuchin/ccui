@@ -51,10 +51,11 @@ final class SwiftTermSession: TerminalSession, LocalProcessTerminalViewDelegate 
     nonisolated func sizeChanged(source: LocalProcessTerminalView, newCols: Int, newRows: Int) {}
 
     nonisolated func setTerminalTitle(source: LocalProcessTerminalView, title: String) {
-        // Claude Code のタイトル形式: "✳ Claude Code" → "⠂ タスク概要" → "✳ タスク概要"
-        // 先頭のステータスインジケーター + スペースを除去し、"Claude Code" 以外をタイトルとして通知
+        // タイトル形式: "✳ Agent Name" → "⠂ タスク概要" → "✳ タスク概要"
+        // 先頭のステータスインジケーター + スペースを除去し、エージェント名以外をタイトルとして通知
         let cleaned = title.drop(while: { !$0.isASCII && !$0.isLetter }).trimmingCharacters(in: .whitespaces)
-        guard !cleaned.isEmpty, cleaned != "Claude Code" else { return }
+        let provider = AgentProviderRegistry.shared.defaultProvider
+        guard !cleaned.isEmpty, cleaned != provider.titleIgnorePattern else { return }
         Task { @MainActor [weak self] in
             self?.onTitleChanged?(cleaned)
         }

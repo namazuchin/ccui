@@ -9,14 +9,14 @@ final class UDSListenerService {
 
     private let socketPath: String
     private var state: ListenerState?
-    private var onEvent: (@MainActor (ClaudeHookPayload) -> Void)?
+    private var onEvent: (@MainActor (AgentHookPayload) -> Void)?
     private var healthCheckTask: Task<Void, Never>?
 
     init(socketPath: String = UDSListenerService.socketPath) {
         self.socketPath = socketPath
     }
 
-    func start(onEvent: @escaping @MainActor (ClaudeHookPayload) -> Void) {
+    func start(onEvent: @escaping @MainActor (AgentHookPayload) -> Void) {
         stop()
         self.onEvent = onEvent
         _ = startListener()
@@ -198,7 +198,7 @@ final class UDSListenerService {
 
                 let decoder = JSONDecoder()
                 do {
-                    let payload = try decoder.decode(ClaudeHookPayload.self, from: data)
+                    let payload = try decoder.decode(AgentHookPayload.self, from: data)
                     Task { @MainActor [weak self] in
                         self?.onEvent?(payload)
                     }

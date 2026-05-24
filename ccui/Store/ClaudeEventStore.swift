@@ -3,7 +3,7 @@ import OSLog
 
 @Observable
 @MainActor
-final class ClaudeEventStore {
+final class AgentEventStore {
     /// worktree パス → (セッション ID → AgentSession)
     private(set) var sessions: [String: [String: AgentSession]] = [:]
 
@@ -14,7 +14,7 @@ final class ClaudeEventStore {
     private(set) var loadError: String?
 
     private let listenerService = UDSListenerService()
-    private let persistenceCoordinator: ClaudeEventPersistenceCoordinator
+    private let persistenceCoordinator: AgentEventPersistenceCoordinator
     private let notificationService: NotificationService?
     private var knownWorktreePaths: Set<String> = []
     /// worktree パス → リポジトリパスのマッピング
@@ -30,18 +30,18 @@ final class ClaudeEventStore {
     private let notifiedStaleness: TimeInterval = 60 * 60
 
     init(
-        persistence: any ClaudeEventPersistence = JSONFileClaudeEventPersistence(),
+        persistence: any AgentEventPersistence = JSONFileAgentEventPersistence(),
         notificationService: NotificationService? = nil
     ) {
-        self.persistenceCoordinator = ClaudeEventPersistenceCoordinator(persistence: persistence)
+        self.persistenceCoordinator = AgentEventPersistenceCoordinator(persistence: persistence)
         self.notificationService = notificationService
     }
 
-    /// 共有 `ClaudeEventPersistenceCoordinator` を受け取るイニシャライザ。
+    /// 共有 `AgentEventPersistenceCoordinator` を受け取るイニシャライザ。
     /// `SessionAnalyticsStore` 等の他ストアと同じディスク領域を読み書きする場合に
     /// このイニシャライザを使い、index.json の更新を直列化する。
     init(
-        coordinator: ClaudeEventPersistenceCoordinator,
+        coordinator: AgentEventPersistenceCoordinator,
         notificationService: NotificationService? = nil
     ) {
         self.persistenceCoordinator = coordinator
@@ -220,9 +220,9 @@ final class ClaudeEventStore {
 
     // MARK: - Internal
 
-    private func handle(_ payload: ClaudeHookPayload) {
+    private func handle(_ payload: AgentHookPayload) {
         let resolvedPath = resolveWorktreePath(for: payload.cwd)
-        let event = ClaudeEvent(worktreePath: resolvedPath, payload: payload)
+        let event = AgentEvent(worktreePath: resolvedPath, payload: payload)
         let sid = event.sessionId
 
         var worktreeSessions = sessions[resolvedPath] ?? [:]
@@ -323,3 +323,7 @@ final class ClaudeEventStore {
     }
 }
 
+
+// MARK: - Backward Compatibility
+@available(*, deprecated, renamed: "AgentEventStore")
+typealias ClaudeEventStore = AgentEventStore

@@ -2,7 +2,7 @@ import CryptoKit
 import Foundation
 import OSLog
 
-protocol ClaudeEventPersistence: Sendable {
+protocol AgentEventPersistence: Sendable {
     func loadAll() throws -> [String: [String: AgentSession]]
     func saveSession(_ session: AgentSession, worktreePath: String, repositoryPath: String?) throws
     func removeSession(_ sessionId: String, worktreePath: String) throws
@@ -19,12 +19,12 @@ struct WorktreeIndexEntry: Codable, Sendable {
     let repositoryPath: String?
 }
 
-enum ClaudeEventPersistenceError: Error {
+enum AgentEventPersistenceError: Error {
     /// index.json は存在するが decode 不能。空でないため破損とみなす。
     case corruptIndex
 }
 
-struct JSONFileClaudeEventPersistence: ClaudeEventPersistence {
+struct JSONFileAgentEventPersistence: ClaudeEventPersistence {
     private let baseDirectory: URL
 
     /// index.json の read-modify-write を直列化する。
@@ -32,7 +32,7 @@ struct JSONFileClaudeEventPersistence: ClaudeEventPersistence {
     /// 同 baseDirectory を指す全インスタンスで共有する static lock。
     private static let indexLock = NSLock()
 
-    init(baseDirectory: URL = JSONFileClaudeEventPersistence.defaultBaseDirectory) {
+    init(baseDirectory: URL = JSONFileAgentEventPersistence.defaultBaseDirectory) {
         self.baseDirectory = baseDirectory
     }
 
@@ -202,7 +202,7 @@ struct JSONFileClaudeEventPersistence: ClaudeEventPersistence {
 
         // ファイルは存在し非空だが decode 不能 = 破損。
         // 空 dict を返すと updateIndex が既存エントリを全消失させるため throw する。
-        throw ClaudeEventPersistenceError.corruptIndex
+        throw AgentEventPersistenceError.corruptIndex
     }
 
     /// 呼び出し前に `Self.indexLock` を取得していること。
@@ -239,3 +239,11 @@ struct JSONFileClaudeEventPersistence: ClaudeEventPersistence {
             .appendingPathComponent("claude-events")
     }
 }
+
+// MARK: - Backward Compatibility
+@available(*, deprecated, renamed: "AgentEventPersistence")
+typealias ClaudeEventPersistence = AgentEventPersistence
+@available(*, deprecated, renamed: "JSONFileAgentEventPersistence")
+typealias JSONFileClaudeEventPersistence = JSONFileAgentEventPersistence
+@available(*, deprecated, renamed: "AgentEventPersistenceCoordinator")
+typealias ClaudeEventPersistenceCoordinator = AgentEventPersistenceCoordinator

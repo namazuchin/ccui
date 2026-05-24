@@ -9,26 +9,31 @@ final class TerminalSessionStore {
     }
 
     private var sessions: [String: ActiveSession] = [:]
-    private var claudePathTask: Task<String, Never>?
+    private var agentPathTask: Task<String, Never>?
     private let appSettingsStore: AppSettingsStore
+    private let provider: any AgentProvider
 
-    init(appSettingsStore: AppSettingsStore) {
+    init(appSettingsStore: AppSettingsStore, provider: any AgentProvider = AgentProviderRegistry.shared.defaultProvider) {
+        self.appSettingsStore = appSettingsStore
+        self.provider = provider
+    }
         self.appSettingsStore = appSettingsStore
     }
 
-    func startResolvingClaudePath() {
-        claudePathTask = Task.detached(priority: .userInitiated) {
+    func startResolvingAgentPath() {
+        let cliName = provider.cliName
+        agentPathTask = Task.detached(priority: .userInitiated) {
             let process = Process()
             let pipe = Pipe()
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            process.arguments = ["-l", "-c", "which claude"]
+            process.arguments = ["-l", "-c", "which \(cliName)"]
             process.standardOutput = pipe
             process.standardError = FileHandle.nullDevice
 
             do {
                 try process.run()
             } catch {
-                return "claude"
+                return "\(cliName)"
             }
 
             // ユーザーの ~/.zshrc が重い場合に hang して ensureSession 全体を
@@ -52,7 +57,7 @@ final class TerminalSessionStore {
                         timeoutTask.cancel()
                         let data = pipe.fileHandleForReading.readDataToEndOfFile()
                         let resolved = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                        continuation.resume(returning: resolved.isEmpty ? "claude" : resolved)
+                        continuation.resume(returning: resolved.isEmpty ? "\(cliName)" : resolved)
                     }
                 }
             } onCancel: {
@@ -85,7 +90,7 @@ final class TerminalSessionStore {
         configureHandlers: ((any TerminalSession) -> Void)? = nil
     ) async -> Bool {
         // dict 操作を同期ブロックに揃えるため、suspend point は冒頭で消化しておく
-        let claudePath = await claudePathTask?.value ?? "claude"
+        let agentPath = await agentPathTask?.value ?? provider.cliName
 
         if let existing = sessions[worktree.path] {
             if existing.sessionId == sessionId {
@@ -94,16 +99,16 @@ final class TerminalSessionStore {
             detachAndTerminate(existing)
             sessions.removeValue(forKey: worktree.path)
         }
-        let claudeArgs = if isResume {
-            "\(claudePath) --resume \(sessionId)"
+        let agentArgs = if isResume {
+            "\(agentPath) --resume \(sessionId)"
         } else {
-            "\(claudePath) --session-id \(sessionId)"
+            "\(agentPath) --session-id \(sessionId)"
         }
         let session = SwiftTermSession(
             workingDirectory: worktree.path,
             label: "Terminal",
             executable: "/bin/zsh",
-            args: ["-l", "-c", claudeArgs],
+            args: ["-l", "-c", agentArgs],
             additionalEnvironment: appSettingsStore.resolvedEnvironmentStrings()
         )
         configureHandlers?(session)

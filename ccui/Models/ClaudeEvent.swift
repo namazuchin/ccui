@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated struct ClaudeHookPayload: Decodable, Sendable {
+nonisolated struct AgentHookPayload: Decodable, Sendable {
     enum HookEventName: String, Codable, Sendable {
         case stop = "Stop"
         case notification = "Notification"
@@ -80,11 +80,11 @@ private struct AnyCodableValue: Decodable {
     }
 }
 
-nonisolated struct ClaudeEvent: Identifiable, Hashable, Codable, Sendable {
+nonisolated struct AgentEvent: Identifiable, Hashable, Codable, Sendable {
     let id: UUID
     let worktreePath: String
     let sessionId: String
-    let hookEventName: ClaudeHookPayload.HookEventName
+    let hookEventName: AgentHookPayload.HookEventName
     let notificationType: String?
     let message: String?
     let toolName: String?
@@ -92,7 +92,7 @@ nonisolated struct ClaudeEvent: Identifiable, Hashable, Codable, Sendable {
     let toolInput: String?
     let receivedAt: Date
 
-    nonisolated static func == (lhs: ClaudeEvent, rhs: ClaudeEvent) -> Bool {
+    nonisolated static func == (lhs: AgentEvent, rhs: AgentEvent) -> Bool {
         lhs.id == rhs.id
     }
 
@@ -100,7 +100,7 @@ nonisolated struct ClaudeEvent: Identifiable, Hashable, Codable, Sendable {
         hasher.combine(id)
     }
 
-    init(worktreePath: String, payload: ClaudeHookPayload) {
+    init(worktreePath: String, payload: AgentHookPayload) {
         self.id = UUID()
         self.worktreePath = worktreePath
         self.sessionId = payload.sessionId ?? "__anonymous__"
@@ -113,7 +113,7 @@ nonisolated struct ClaudeEvent: Identifiable, Hashable, Codable, Sendable {
         self.receivedAt = Date()
     }
 
-    init(id: UUID, worktreePath: String, sessionId: String, hookEventName: ClaudeHookPayload.HookEventName, notificationType: String?, message: String?, toolName: String?, prompt: String? = nil, toolInput: String? = nil, receivedAt: Date) {
+    init(id: UUID, worktreePath: String, sessionId: String, hookEventName: AgentHookPayload.HookEventName, notificationType: String?, message: String?, toolName: String?, prompt: String? = nil, toolInput: String? = nil, receivedAt: Date) {
         self.id = id
         self.worktreePath = worktreePath
         self.sessionId = sessionId
@@ -126,3 +126,8 @@ nonisolated struct ClaudeEvent: Identifiable, Hashable, Codable, Sendable {
         self.receivedAt = receivedAt
     }
 }
+
+// MARK: - Backward Compatibility Typealiases
+
+typealias ClaudeHookPayload = AgentHookPayload
+typealias ClaudeEvent = AgentEvent

@@ -7,16 +7,16 @@ final class SessionAnalyticsStore {
     private(set) var uniqueToolCount: Int = 0
     private(set) var isLoading = false
 
-    private let coordinator: ClaudeEventPersistenceCoordinator
+    private let coordinator: AgentEventPersistenceCoordinator
     private var currentTask: Task<Void, Never>?
 
-    init(persistence: any ClaudeEventPersistence = JSONFileClaudeEventPersistence()) {
-        self.coordinator = ClaudeEventPersistenceCoordinator(persistence: persistence)
+    init(persistence: any ClaudeEventPersistence = JSONFileAgentEventPersistence()) {
+        self.coordinator = AgentEventPersistenceCoordinator(persistence: persistence)
     }
 
-    /// 共有 coordinator を受け取るイニシャライザ。`ClaudeEventStore` と同じ
+    /// 共有 coordinator を受け取るイニシャライザ。`AgentEventStore` と同じ
     /// インスタンスを共有することで、書き込みと読み取りを直列化する。
-    init(coordinator: ClaudeEventPersistenceCoordinator) {
+    init(coordinator: AgentEventPersistenceCoordinator) {
         self.coordinator = coordinator
     }
 

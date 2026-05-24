@@ -38,7 +38,7 @@ final class DetailUIState {
     var sessionAnalyticsStore: SessionAnalyticsStore
     var webViewStore = WebViewStore()
 
-    init(persistenceCoordinator: ClaudeEventPersistenceCoordinator? = nil) {
+    init(persistenceCoordinator: AgentEventPersistenceCoordinator? = nil) {
         if let persistenceCoordinator {
             self.sessionAnalyticsStore = SessionAnalyticsStore(coordinator: persistenceCoordinator)
         } else {

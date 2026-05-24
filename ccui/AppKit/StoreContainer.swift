@@ -24,7 +24,7 @@ final class StoreContainer {
         self.terminalSessionStore = TerminalSessionStore(appSettingsStore: settingsStore)
         let notificationService = NotificationService()
         self.notificationService = notificationService
-        // ClaudeEventStore（書き込み）と SessionAnalyticsStore（読み取り）が
+        // AgentEventStore（書き込み）と SessionAnalyticsStore（読み取り）が
         // 同じ Coordinator を共有することで index.json の整合性を担保する。
         let persistenceCoordinator = ClaudeEventPersistenceCoordinator()
         self.claudeEventStore = ClaudeEventStore(

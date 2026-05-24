@@ -47,4 +47,44 @@ final class ClaudeHooksInstaller {
         let jsonData = try JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys])
         try jsonData.write(to: URL(fileURLWithPath: settingsPath), options: .atomic)
     }
+
+    nonisolated static func uninstall(worktreePath: String, socketPath: String = UDSListenerService.socketPath) throws {
+        installLock.lock()
+        defer { installLock.unlock() }
+
+        let claudeDir = (worktreePath as NSString).appendingPathComponent(".claude")
+        let settingsPath = (claudeDir as NSString).appendingPathComponent("settings.local.json")
+
+        guard let existingData = try? Data(contentsOf: URL(fileURLWithPath: settingsPath)),
+              var settings = try? JSONSerialization.jsonObject(with: existingData) as? [String: Any] else {
+            return
+        }
+
+        let escapedPath = socketPath.replacingOccurrences(of: "'", with: "'\\''")
+
+        var existingHooks = settings["hooks"] as? [String: Any] ?? [:]
+        for eventName in ["Stop", "Notification", "PreToolUse", "PostToolUse", "SubagentStop", "PermissionRequest", "UserPromptSubmit"] {
+            var entries = existingHooks[eventName] as? [[String: Any]] ?? []
+            entries.removeAll { entry in
+                guard let hooks = entry["hooks"] as? [[String: Any]] else { return false }
+                return hooks.contains { hook in
+                    guard let cmd = hook["command"] as? String else { return false }
+                    return cmd.contains("nc -U '\(escapedPath)'")
+                }
+            }
+            if entries.isEmpty {
+                existingHooks.removeValue(forKey: eventName)
+            } else {
+                existingHooks[eventName] = entries
+            }
+        }
+        if existingHooks.isEmpty {
+            settings.removeValue(forKey: "hooks")
+        } else {
+            settings["hooks"] = existingHooks
+        }
+
+        let jsonData = try JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys])
+        try jsonData.write(to: URL(fileURLWithPath: settingsPath), options: .atomic)
+    }
 }
